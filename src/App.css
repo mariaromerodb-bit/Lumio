@@ -1,0 +1,286 @@
+/* ==========================================================================
+   1. VARIABLES Y CONFIGURACIÓN BASE
+   ========================================================================== */
+:root {
+    --bg-gradient: linear-gradient(135deg, #e0f4ed 0%, #fff9e6 100%);
+    --sidebar-bg: rgba(255, 255, 255, 0.4);
+    --card-bg: rgba(255, 255, 255, 0.6);
+    --active-menu: #bcecdb;
+    --text-main: #1a1a1a;
+    --text-muted: #666666;
+    
+    /* Fuentes y bordes */
+    --font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    --border-radius-lg: 24px;
+    --border-radius-md: 16px;
+    --border-radius-sm: 8px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: var(--font-family);
+    background: var(--bg-gradient);
+    color: var(--text-main);
+    min-height: 100vh;
+    overflow-x: hidden;
+}
+
+.app-container {
+    display: flex;
+    min-height: 100vh;
+    width: 100%;
+}
+
+/* ==========================================================================
+   2. ESTRUCTURA LATERAL (SIDEBAR)
+   ========================================================================== */
+.sidebar {
+    width: 260px;
+    background: var(--sidebar-bg);
+    backdrop-filter: blur(10px); /* Efecto vidrio esmerilado */
+    padding: 40px 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    height: 100vh;
+    position: sticky;
+    top: 0;
+    border-right: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.brand-logo h1 {
+    font-size: 24px;
+    font-weight: 800;
+    letter-spacing: 1px;
+    margin-bottom: 30px;
+}
+
+.user-profile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.profile-avatar {
+    width: 80px;
+    height: 80px;
+    background-color: #f7d6d6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: bold;
+    color: #a36161;
+    margin-bottom: 12px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+.user-name {
+    font-weight: 600;
+    font-size: 16px;
+}
+
+.main-nav ul, .sidebar-footer ul {
+    list-style: none;
+}
+
+.nav-btn {
+    display: flex;
+    align-items: center;
+    width: 100%;                 
+    background: none;           
+    border: none;              
+    text-align: left;          
+    font-family: inherit;        
+    font-size: 16px;
+    padding: 12px 16px;
+    border-radius: var(--border-radius-md);
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: var(--text-main);
+    cursor: pointer;            
+    transition: all 0.3s ease;
+}
+
+.nav-btn .icon {
+    margin-right: 12px;
+    font-size: 18px;
+}
+
+.nav-btn.active {
+    background-color: var(--active-menu);
+    font-weight: 600;
+}
+
+.nav-btn:hover:not(.active) {
+    background-color: rgba(255, 255, 255, 0.2);
+}
+
+.btn-toggle-menu {
+    background: none;
+    border: none;
+    width: 100%;
+    text-align: left;
+    padding: 12px 16px;
+    font-family: inherit;
+    font-size: 14px;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* ==========================================================================
+   3. CONTENIDO PRINCIPAL (MAIN CONTENT)
+   ========================================================================== */
+.main-content {
+    flex: 1;
+    padding: 40px 50px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.content-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 40px;
+}
+
+.search-bar {
+    position: relative;
+    width: 450px;
+}
+
+.search-bar input {
+    width: 100%;
+    padding: 12px 45px 12px 20px;
+    border-radius: var(--border-radius-lg);
+    border: none;
+    background: rgba(255, 255, 255, 0.7);
+    font-size: 14px;
+    outline: none;
+}
+
+.btn-search {
+    position: absolute;
+    right: 5px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #bcecdb;
+    border: none;
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    cursor: pointer;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.btn-notifications {
+    background: none;
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+}
+
+.mini-avatar {
+    width: 36px;
+    height: 36px;
+    background: #f7d6d6;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: bold;
+    color: #a36161;
+}
+
+.header-username {
+    font-weight: 600;
+    font-size: 14px;
+}
+
+/* ==========================================================================
+   4. BLOQUE DE ESTADÍSTICAS (SECCIÓN PERFIL)
+   ========================================================================== */
+.profile-summary {
+    margin-bottom: 40px;
+}
+
+.section-title {
+    font-size: 28px;
+    font-weight: 700;
+    margin-bottom: 20px;
+    letter-spacing: 0.5px;
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+}
+
+.stat-card {
+    background: var(--card-bg);
+    padding: 24px;
+    border-radius: var(--border-radius-md);
+    text-align: center;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.02);
+}
+
+.stat-number {
+    display: block;
+    font-size: 36px;
+    font-weight: 700;
+    margin-bottom: 4px;
+}
+
+.stat-label {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+/* ==========================================================================
+   5. CARRUSELES DE MEDIOS (ESTRUCTURA VACÍA PARA LA API)
+   ========================================================================== */
+.media-section {
+    margin-bottom: 40px;
+}
+
+.section-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+}
+
+.section-subtitle {
+    font-size: 22px;
+    font-weight: 600;
+}
+
+.view-all-link {
+    font-size: 14px;
+    color: var(--text-muted);
+}
+
+.media-carousel {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 10px;
+}
