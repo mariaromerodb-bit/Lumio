@@ -61,6 +61,5 @@ function Sidebar() {
     </aside>
   );
 }
-
-// 🚨 ESTO ES LO MÁS IMPORTANTE: Le dice a React que este componente se puede usar en App.jsx
+ 
 export default Sidebar;

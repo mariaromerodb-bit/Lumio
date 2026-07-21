@@ -3,45 +3,39 @@ import './App.css';
 import Sidebar from './components/Sidebar';
 
 function App() {
-  // 1. Estados de los contadores (empiezan en 0)
+  
   const [moviesCount, setMoviesCount] = useState(0);
 
-  // 2. 🛡️ NUEVOS ESTADOS: Manejo de Errores y Carga
-  const [isLoading, setIsLoading] = useState(false); // ¿Está cargando la película?
-  const [errorMessage, setErrorMessage] = useState(null); // Si hay un error, guardamos el texto aquí
-  const [latestMovie, setLatestMovie] = useState(null); // Almacena la última película añadida
 
-  // 3. ⚙️ FUNCIÓN ASÍNCRONA: Simula traer una película de internet con manejo de errores
+  const [isLoading, setIsLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState(null); 
+  const [latestMovie, setLatestMovie] = useState(null); 
+
+  
   const simularBuscarPelicula = async (debeFallar) => {
-    // Reseteamos errores anteriores y activamos la pantalla de carga
     setErrorMessage(null);
     setIsLoading(true);
 
-    try {
-      // Simulamos que la petición tarda 1.5 segundos en responder por red
+    try { 
       await new Promise((resolve) => setTimeout(resolve, 1500));
 
       if (debeFallar) {
-        // Forzamos un error de red simulado si hacemos clic en el botón de fallo
         throw new Error("No se pudo conectar con el servidor de películas. Revisa tu conexión a internet.");
       }
 
-      // Si no falla, creamos una película de éxito
       const nuevaPelicula = {
         id: Date.now(),
         titulo: "Shōgun (2024)",
         genero: "Drama / Histórico"
       };
 
-      // Guardamos la película en el estado, sumamos 1 al contador y apagamos la carga
       setLatestMovie(nuevaPelicula);
       setMoviesCount(prevCount => prevCount + 1);
 
     } catch (error) {
-      // 🚨 AQUÍ ATRAPAMOS EL ERROR: En lugar de congelar la pantalla, guardamos el mensaje
+      
       setErrorMessage(error.message);
-    } finally {
-      // Este bloque siempre se ejecuta, falle o no, para quitar el letrero de "Cargando..."
+    } finally { 
       setIsLoading(false);
     }
   };
