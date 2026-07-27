@@ -1,142 +1,150 @@
-import React, { useState } from 'react';
-import './App.css';
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
+import Explore from './views/Explore';
+import MediaDetail from './views/MediaDetail';
+import Profile from './views/Profile';
+import Movies from './views/Movies';
+import Login from './views/Login';
 
 function App() {
-  
-  const [moviesCount, setMoviesCount] = useState(0);
+  const [currentUser, setCurrentUser] = useState(() => {
+    const savedUser = localStorage.getItem('lumio_current_user');
+    return savedUser ? JSON.parse(savedUser) : null;
+  });
 
+  const [userMediaState, setUserMediaState] = useState(() => {
+    const saved = localStorage.getItem('lumio_user_media');
+    return saved ? JSON.parse(saved) : {};
+  });
 
-  const [isLoading, setIsLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState(null); 
-  const [latestMovie, setLatestMovie] = useState(null); 
+  useEffect(() => {
+    localStorage.setItem('lumio_user_media', JSON.stringify(userMediaState));
+  }, [userMediaState]);
 
-  
-  const simularBuscarPelicula = async (debeFallar) => {
-    setErrorMessage(null);
-    setIsLoading(true);
+  useEffect(() => {
+    if (currentUser) {
+      localStorage.setItem('lumio_current_user', JSON.stringify(currentUser));
+    } else {
+      localStorage.removeItem('lumio_current_user');
+    }
+  }, [currentUser]);
 
-    try { 
-      await new Promise((resolve) => setTimeout(resolve, 1500));
+  const handleLogout = () => {
+    setCurrentUser(null);
+  };
 
-      if (debeFallar) {
-        throw new Error("No se pudo conectar con el servidor de películas. Revisa tu conexión a internet.");
+  const handleLogin = (userData) => {
+    setCurrentUser(userData);
+  };
+
+  const handleUpdateUserMedia = (mediaKey, newData) => {
+    setUserMediaState(prev => ({
+      ...prev,
+      [mediaKey]: newData
+    }));
+  };
+
+  const handleToggleAddList = (mediaItem) => {
+    const mediaType = mediaItem.media_type || (mediaItem.title ? 'movie' : 'tv');
+    const mediaKey = `${mediaType}-${mediaItem.id}`;
+
+    setUserMediaState(prev => {
+      const currentItem = prev[mediaKey] || {};
+      const isCurrentlyAdded = !!currentItem.added;
+
+      if (isCurrentlyAdded) {
+        const copy = { ...prev };
+        delete copy[mediaKey];
+        return copy;
+      } else {
+        return {
+          ...prev,
+          [mediaKey]: {
+            ...currentItem,
+            added: true,
+            title: mediaItem.title || mediaItem.name,
+            poster_path: mediaItem.poster_path,
+            type: mediaType,
+            total_episodes: mediaItem.number_of_episodes || mediaItem.total_episodes || 0
+          }
+        };
       }
+    });
+  };
 
-      const nuevaPelicula = {
-        id: Date.now(),
-        titulo: "Shōgun (2024)",
-        genero: "Drama / Histórico"
+  const handleToggleEpisode = (mediaKey, epId, totalEpisodes, baseItemInfo, previousEpIds = []) => {
+    setUserMediaState(prev => {
+      const currentItem = prev[mediaKey] || {
+        ...baseItemInfo,
+        added: true,
+        watchedEpisodes: []
       };
 
-      setLatestMovie(nuevaPelicula);
-      setMoviesCount(prevCount => prevCount + 1);
+      const currentWatched = currentItem.watchedEpisodes || [];
+      const isEpAlreadyWatched = currentWatched.includes(epId);
+      let newWatchedEpisodes;
 
-    } catch (error) {
-      
-      setErrorMessage(error.message);
-    } finally { 
-      setIsLoading(false);
-    }
+      if (isEpAlreadyWatched) {
+        newWatchedEpisodes = currentWatched.filter(id => id !== epId);
+      } else {
+        const combined = [...currentWatched, epId, ...previousEpIds];
+        newWatchedEpisodes = Array.from(new Set(combined));
+      }
+
+      return {
+        ...prev,
+        [mediaKey]: {
+          ...currentItem,
+          ...baseItemInfo,
+          added: true,
+          total_episodes: totalEpisodes || currentItem.total_episodes,
+          watchedEpisodes: newWatchedEpisodes,
+          watched: newWatchedEpisodes.length >= totalEpisodes && totalEpisodes > 0
+        }
+      };
+    });
   };
 
   return (
-    <div className="app-container">
-      <Sidebar />
-
-      <main className="main-content">
-        <header className="content-header">
-          <div className="search-bar">
-            <input type="text" placeholder="Buscar películas, series, personas..." />
-            <button type="button" className="btn-search">🔍</button>
-          </div>
+    <div style={{ display: 'flex', minHeight: '100vh', background: '#f8f9fa' }}>
+      <Sidebar currentUser={currentUser} onLogout={handleLogout} />
+      <div style={{ flex: 1, padding: '20px', overflowY: 'auto' }}>
+        <Routes>
+          <Route path="/" element={<Navigate to="/explorar" replace />} />
           
-          <div className="header-actions">
-            <button type="button" className="btn-notifications">🔔</button>
-            <div className="mini-avatar">JB</div>
-            <span className="header-username">Juan B.</span>
-          </div>
-        </header>
+          <Route path="/login" element={<Login onLogin={handleLogin} />} />
 
-        {/* Sección de Perfil y Estadísticas */}
-        <section className="profile-summary">
-          <h2 className="section-title">PERFIL</h2>
+          <Route 
+            path="/explorar" 
+            element={<Explore userMediaState={userMediaState} onToggleAddList={handleToggleAddList} />} 
+          />
           
-          <div className="stats-grid">
-            <div className="stat-card">
-              <span className="stat-number">0</span>
-              <span className="stat-label">series vistas</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">0</span>
-              <span className="stat-label">episodios vistos</span>
-            </div>
-            <div className="stat-card">
-              <span className="stat-number">{moviesCount}</span>
-              <span className="stat-label">películas vistas</span>
-            </div>
-          </div>
-        </section>
-
-        {/* 🛠️ PANEL TEMPORAL DE PRUEBAS PARA EL JUNIOR */}
-        <section style={{ background: 'rgba(255,255,255,0.5)', padding: '20px', borderRadius: '12px', marginBottom: '30px' }}>
-          <h3>Control de Errores (Zona de Pruebas)</h3>
-          <p style={{ fontSize: '14px', color: '#666', marginBottom: '15px' }}>
-            Usa estos botones para ver cómo reacciona React cuando las cosas van bien o cuando falla la red.
-          </p>
+          <Route 
+            path="/detalle/:type/:id" 
+            element={
+              <MediaDetail 
+                userMediaState={userMediaState} 
+                onUpdateUserMedia={handleUpdateUserMedia} 
+                onToggleAddList={handleToggleAddList} 
+                onToggleEpisode={handleToggleEpisode} 
+              />
+            } 
+          />
           
-          <div style={{ display: 'flex', gap: '10px' }}>
-            <button 
-              onClick={() => simularBuscarPelicula(false)} 
-              disabled={isLoading}
-              style={{ padding: '10px 15px', background: '#bcecdb', border: 'none', borderRadius: '6px', cursor: 'pointer' }}
-            >
-              Simular Éxito (Añadir película)
-            </button>
-            
-            <button 
-              onClick={() => simularBuscarPelicula(true)} 
-              disabled={isLoading}
-              style={{ padding: '10px 15px', background: '#f7d6d6', border: 'none', borderRadius: '6px', cursor: 'pointer', color: '#a36161' }}
-            >
-              Simular Error de Red
-            </button>
-          </div>
+          <Route 
+            path="/perfil" 
+            element={currentUser ? <Profile currentUser={currentUser} userMediaState={userMediaState} onToggleAddList={handleToggleAddList} /> : <Navigate to="/login" replace />} 
+          />
+          
+          <Route 
+            path="/peliculas" 
+            element={<Movies userMediaState={userMediaState} onToggleAddList={handleToggleAddList} />} 
+          />
 
-          {/* 🔄 INTERFAZ CONDICIONAL: Mostramos mensajes dinámicos según el estado */}
-          {isLoading && (
-            <p style={{ marginTop: '15px', color: '#666', fontWeight: 'bold' }}>
-              ⏳ Conectando con la API... Por favor, espera.
-            </p>
-          )}
-
-          {errorMessage && (
-            <div style={{ marginTop: '15px', padding: '10px', background: '#ffdddd', borderLeft: '5px solid #ff5c5c', borderRadius: '4px', color: '#a71d1d' }}>
-              ⚠️ <strong>Error detectado:</strong> {errorMessage}
-            </div>
-          )}
-
-          {latestMovie && !isLoading && !errorMessage && (
-            <p style={{ marginTop: '15px', color: '#2e7d32' }}>
-              ✅ ¡Película añadida con éxito!: <strong>{latestMovie.titulo}</strong> ({latestMovie.genero})
-            </p>
-          )}
-        </section>
-
-        {/* Carruseles (Esperando la API real) */}
-        <section className="media-section">
-          <h2 className="section-subtitle">Tus Películas</h2>
-          <div className="media-carousel" style={{ minHeight: '100px', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.2)', borderRadius: '12px', marginTop: '10px' }}>
-            {latestMovie && !errorMessage ? (
-              <div style={{ background: 'white', padding: '15px', borderRadius: '8px', boxShadow: '0 4px 6px rgba(0,0,0,0.05)' }}>
-                🎬 {latestMovie.titulo}
-              </div>
-            ) : (
-              <span style={{ color: '#999' }}>No hay películas marcadas como vistas todavía</span>
-            )}
-          </div>
-        </section>
-      </main>
+          <Route path="*" element={<Navigate to="/explorar" replace />} />
+        </Routes>
+      </div>
     </div>
   );
 }
