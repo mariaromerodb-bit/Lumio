@@ -46,8 +46,7 @@ function Sidebar({ currentUser, onLogout }) {
           </div>
         )}
       </div>
-
-      {/* Enlaces de navegación */}
+ 
       <nav style={{ display: 'flex', flexDirection: 'column', gap: '8px', flex: 1 }}>
         <NavLink 
           to="/explorar" 
